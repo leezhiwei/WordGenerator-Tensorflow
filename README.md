@@ -2,9 +2,9 @@
 I found a project on the internet. Written UI for the text generation.
 
 # Requirements of packages
-Markup : *Tensorflow
-         *Python3-tk (if on linux)
-         *numpy
+* Tensorflow
+* Python3-tk (if on linux)
+* numpy
 
 # Source of wordlist
 https://www.mit.edu/~ecprice/wordlist.10000
