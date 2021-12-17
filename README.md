@@ -18,5 +18,5 @@ https://www.mit.edu/~ecprice/wordlist.10000
 # Some code from
 https://machinelearningmastery.com/text-generation-lstm-recurrent-neural-networks-python-keras/
 
-#Help and Contributions
+# Help and Contributions
 Any help and contributions by anyone is appreciated!
