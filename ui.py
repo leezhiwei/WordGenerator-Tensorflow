@@ -8,7 +8,6 @@ from keras.callbacks import ModelCheckpoint
 from keras.utils import np_utils
 import tkinter as tk
 from tkinter import *
-import sys
 
 #Vars
 filename = "wordlist.10000"
@@ -17,7 +16,6 @@ raw_text = raw_text.lower()
 chars = sorted(list(set(raw_text)))
 chars_to_int = dict((c, i) for i, c in enumerate(chars))
 n_vocab = len(chars)
-Text = "Press 'Generate a word' to continue"
 
 #Vars Part2
 dataX = []
@@ -51,37 +49,29 @@ print("\"", ''.join([int_to_char[value] for value in dataX[start]]), "\"")
 
 #Character Generation
 def textgen():
-	x = numpy.reshape(dataX[start],(1, len(dataX[start]), 1))
-	x = x / float(n_vocab)
-	prediction = model.predict(x, verbose=0)
-	index = numpy.argmax(prediction)
-	result = int_to_char[index]
-	seq_in = [int_to_char[value] for value in dataX[start]]
-	sys.stdout.write(result)
-	dataX[start].append(index)
-	dataX[start] = dataX[start][1:len(dataX[start])]
-	sys.stdout.write(result)
-	Text = result
-
+	num=0
+	while num < 20:		# Adjust amount of loops
+		x = numpy.reshape(dataX[start],(1, len(dataX[start]), 1))
+		x = x / float(n_vocab)
+		prediction = model.predict(x, verbose=0)
+		index = numpy.argmax(prediction)
+		result = int_to_char[index]
+		seq_in = [int_to_char[value] for value in dataX[start]]
+		dataX[start].append(index)
+		dataX[start] = dataX[start][1:len(dataX[start])]
+		num = num + 1
+		word.insert('2.0', result)
 
 #Initialize Tkinter window
 window = tk.Tk()
-text = Text
-greeting= tk.Label(text=text,
-		width=26,
-		height=3)
-button = tk.Button(text="Generate a new word!",
+word = tk.Text(height=28, width=45)
+button = tk.Button(text="Generate a list of words!",
 		width=22,
 		height=3,
 		bg="black",
 		fg="white",
 		command = textgen)
-greeting.pack()
+word.pack()
+word.insert('2.0','Press the "Generate a list of words!" button to continue.')
 button.pack()
 window.mainloop()
-
-#Dynamically update Text Box
-displayVar = StringVar()
-def updateDisplay(Text):
-	displayVar.set(Text)
-
