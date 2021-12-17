@@ -1,39 +1,56 @@
-import tensorflow as tf
-import numpy as np
-import os
-import time
-from tensorflow.keras import layers
+#From https://machinelearningmastery.com/text-generation-lstm-recurrent-neural-networks-python-keras/
+#LSTM Development
+import numpy    #importing main lib
+from keras.models import Sequential
+from keras.layers import LSTMV2, Dense
+from keras.layers import Dropout
+from keras.layers import LSTM
+from keras.callbacks import CallbackList, ModelCheckpoint
+from keras.utils import np_utils
 
-# opening wordlist
-wordlist = 'wordlist.10000'
-text = open(wordlist, "r").read()
+#Loading and lowercasing text
+filename = "wordlist.10000"     #Configure wordlist here
+raw_text = open(filename, 'r', encoding='utf-8').read()
+raw_text = raw_text.lower()
 
-# variables to set
-maxlen = 999
-step = 3
+#Preperation to convert text to integers
+chars = sorted(list(set(raw_text)))
+chars_to_int = dict((c, i) for i, c in enumerate(chars))
 
-# Pre-Processing data
-sentences = []
-next_chars = [] #holds the targets
-for i in range(0, len(text)-maxlen, step):
-	sentences.append(text[i:i+maxlen])
-	next_chars.append(text[i+maxlen])
-#VECTORIZATION
-chars = sorted(set(text))
-char_indices = dict((char, chars.index(char)) for char in chars)
-x = np.zeros((len(sentences), maxlen, len(chars)), dtype=np.bool)
-y = np.zeros((len(sentences), len(chars)), dtype=np.bool)
-for i, sentence in enumerate(sentences):
-	for t, char in enumerate(sentence):
-		x[i, t, char_indices[char]] = 1
-	y[i, char_indices[next_chars[i]]] = 1
+#Summarise Dataset
+n_chars = len(raw_text)
+n_vocab = len(chars)
+print ("Total Characters: ", n_chars)
+print ("Total Vocabs: ", n_vocab)
 
-#LSTM Builder
-model = tf.keras.models.Sequential()
-model.add(layers.LSTM(128, input_shape=(maxlen, len(chars))))
-model.add(layers.Dense(len(chars), activation="softmax"))
+#Prepare dataset of I/O pairs encoded as integers
+seq_length = 100    #Set Sequence length
+dataX = []
+dataY = []
+for i in range(0, n_chars - seq_length):
+    seq_in = raw_text[i:i + seq_length]
+    seq_out = raw_text[i + seq_length]
+    dataX.append([chars_to_int[char]for char in seq_in])
+    dataY.append(chars_to_int[seq_out])
+n_patterns = len(dataX)
+print("Total Patterns: ", n_patterns)
 
-#Compiling model
-model.compile(loss="categorical_crossentropy", optimizer="adam")
+#Input Sequences to form
+X = numpy.reshape(dataX, (n_patterns, seq_length, 1)) #X reshape to be [samples, time steps, features]
+X = X / float(n_vocab) # normalise
+y = np_utils.to_categorical(dataY) # one hot encode the output variable
 
+#LSTM Define
+model = Sequential()
+model.add(LSTMV2(256, input_shape=(X.shape[1], X.shape[2])))
+model.add(Dropout(0.2))
+model.add(Dense(y.shape[1], activation='softmax'))
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['acc'])
 
+#Define Checkpoint
+filepath="weights-improvement-{epoch:02d}-{loss:.4f}.hdf5"
+checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, mode='min')
+callbacks_list = [checkpoint]
+
+#Fitting of model to data
+model.fit(X, y, epochs=20, batch_size=128, callbacks=callbacks_list)
