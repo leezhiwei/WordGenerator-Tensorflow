@@ -20,3 +20,6 @@ https://machinelearningmastery.com/text-generation-lstm-recurrent-neural-network
 
 # Help and Contributions
 Any help and contributions by anyone is appreciated!
+
+# Features to work on!!
+1. Make it so that after running the text processing & training script, you don't have to edit the ui.py to accomodate the HDF5 file.
