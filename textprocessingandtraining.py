@@ -7,6 +7,11 @@ from keras.layers import Dropout
 from keras.layers import LSTM
 from keras.callbacks import CallbackList, ModelCheckpoint
 from keras.utils import np_utils
+import os 
+import glob
+
+#Number of epochs (set here)
+epoch = 20
 
 #Loading and lowercasing text
 filename = "wordlist.10000"     #Configure wordlist here
@@ -48,9 +53,17 @@ model.add(Dense(y.shape[1], activation='softmax'))
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['acc'])
 
 #Define Checkpoint
-filepath="weights-improvement-{epoch:02d}-{loss:.4f}.hdf5"
+filepath="weights-improvement-{epoch}-{loss:.4f}.hdf5"
 checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, mode='min')
 callbacks_list = [checkpoint]
 
 #Fitting of model to data
-model.fit(X, y, epochs=20, batch_size=128, callbacks=callbacks_list)
+model.fit(X, y, epochs=epoch, batch_size=128, callbacks=callbacks_list) # Change batch_size according to ram (experimental)
+
+#Find last epoch HDF5
+for file in glob.glob("./weights-improvement-{}-*.hdf5".format(epoch)):
+    os.rename(file,'model.hdf5') #Rename last hdf5 to model.hdf5
+
+#Delete other model files
+for weights in glob.glob("weights*.hdf5"):
+    os.remove(weights) #Removes other weights-improvement files to save space

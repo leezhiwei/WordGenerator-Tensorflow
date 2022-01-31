@@ -31,7 +31,7 @@ y = np_utils.to_categorical(dataY)
 
 
 #Loading network weights
-filename = "weights-improvement-20-1.4702.hdf5" # Change your .hdf5 here
+filename = "model.hdf5" # Change your .hdf5 here
 model = Sequential()
 model.add(LSTMV2(256, input_shape=(X.shape[1], X.shape[2])))
 model.add(Dropout(0.2))
